@@ -26,13 +26,11 @@
 
 ### YouTube Speed
 
-打开 YouTube 视频时自动显示播放器内置的“详细统计信息”（Stats for nerds），并将其中的连接速度从 Kbps 实时换算为 MB/s（保留两位小数）。播放器控制栏提供一个小型“i”按钮，可随时打开或关闭；深灰色表示已关闭，浅灰色表示正在显示。支持普通视频、直播和站内切换视频。手动关闭后不会在当前视频反复弹出。
-
-![YouTube Speed 详细统计信息按钮](./assets/youtube-speed-info.svg)
+打开 YouTube 视频时自动显示播放器内置的“详细统计信息”（Stats for nerds），并将其中的连接速度从 Kbps 实时换算为 MB/s（保留两位小数）。视频画面右上角提供一个小型“i”按钮，可随时打开或关闭；图标取自 YouTube 自带的“详细统计信息”菜单项。支持普通视频、直播和站内切换视频。手动关闭后不会在当前视频反复弹出。
 
 | 项目 | 信息 |
 | --- | --- |
-| 当前版本 | `1.3.1` |
+| 当前版本 | `1.3.2` |
 | 脚本文件 | [`scripts/youtube-speed.user.js`](./scripts/youtube-speed.user.js) |
 | 适用网站 | `https://www.youtube.com/*`、`https://youtube.com/*` |
 | 许可证 | [MIT](./LICENSE) |

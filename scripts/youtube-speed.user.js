@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.3.1
+// @version      1.3.2
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
-// @description  自动显示详细统计信息，将网速换算为 MB/s，并提供播放器快捷开关
+// @description  自动显示详细统计信息，将网速换算为 MB/s，并提供视频右上角快捷开关
 // @downloadURL  https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @updateURL    https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @match        https://www.youtube.com/*
@@ -122,76 +122,64 @@
         converted.textContent = `(${(kbps / 8192).toFixed(2)} MB/s)`;
     }
 
-    function ensureButton(controls) {
+    function ensureButton(player) {
         if (!button) {
             const style = document.createElement('style');
             style.id = STYLE_ID;
             style.textContent = `
-                #${BUTTON_ID}.ytp-button {
-                    position: relative;
+                #${BUTTON_ID} {
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    z-index: 1000;
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
                     box-sizing: border-box;
-                    width: 40px;
-                    height: 36px;
-                    flex: 0 0 40px;
-                    align-self: center;
+                    width: 30px;
+                    height: 30px;
                     padding: 0;
-                    border: 0;
-                    border-radius: 4px;
-                    background: #535151;
+                    border: 1px solid rgba(255, 255, 255, .38);
+                    border-radius: 5px;
+                    background: rgba(0, 0, 0, .72);
                     color: #fff;
                     cursor: pointer;
+                    opacity: .82;
                     pointer-events: auto;
-                    transition: background-color .15s ease;
+                    transition: background-color .15s ease, opacity .15s ease;
                 }
-                #${BUTTON_ID}.ytp-button:hover,
-                #${BUTTON_ID}.ytp-button:focus-visible {
-                    background: #696767;
+                #${BUTTON_ID}:hover,
+                #${BUTTON_ID}:focus-visible {
+                    background: rgba(45, 45, 45, .95);
+                    opacity: 1;
                 }
-                #${BUTTON_ID}.ytp-button:focus-visible {
+                #${BUTTON_ID}:focus-visible {
                     outline: 2px solid #fff;
-                    outline-offset: -3px;
+                    outline-offset: 2px;
                 }
-                #${BUTTON_ID}[aria-pressed="false"] {
-                    background: #3d3c3c;
+                #${BUTTON_ID}[aria-pressed="true"] {
+                    background: rgba(70, 70, 70, .88);
+                    opacity: 1;
                 }
                 #${BUTTON_ID} svg {
                     display: block;
-                    width: 36px;
-                    height: 36px;
-                    fill: none;
-                    stroke: currentColor;
+                    width: 20px;
+                    height: 20px;
+                    fill: currentColor;
                 }
             `;
             (document.head || document.documentElement).appendChild(style);
 
             button = document.createElement('button');
             button.id = BUTTON_ID;
-            button.className = 'ytp-button';
             button.type = 'button';
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.setAttribute('viewBox', '0 0 48 48');
             svg.setAttribute('aria-hidden', 'true');
             svg.setAttribute('focusable', 'false');
-            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            circle.setAttribute('cx', '24');
-            circle.setAttribute('cy', '24');
-            circle.setAttribute('r', '11');
-            circle.setAttribute('stroke-width', '2.5');
-            const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            dot.setAttribute('cx', '24');
-            dot.setAttribute('cy', '18.5');
-            dot.setAttribute('r', '1.45');
-            dot.setAttribute('fill', 'currentColor');
-            dot.setAttribute('stroke', 'none');
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', 'M24 23.5v7');
-            path.setAttribute('stroke-width', '2.5');
-            path.setAttribute('stroke-linecap', 'round');
-            svg.appendChild(circle);
-            svg.appendChild(dot);
+            // Path from YouTube's own "Stats for nerds" context-menu icon.
+            path.setAttribute('d', 'M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z');
             svg.appendChild(path);
             button.appendChild(svg);
             button.addEventListener('click', toggleStats);
@@ -199,7 +187,7 @@
                 button.addEventListener(type, event => event.stopPropagation());
             }
         }
-        if (button.parentElement !== controls) controls.insertBefore(button, controls.firstChild);
+        if (button.parentElement !== player) player.appendChild(button);
     }
 
     function sync() {
@@ -216,9 +204,7 @@
             return;
         }
 
-        const controls = player.querySelector('.ytp-right-controls');
-        if (controls) ensureButton(controls);
-        else button?.remove();
+        ensureButton(player);
         try {
             if (completedVideo !== videoId) {
                 if (!player.isVideoInfoVisible()) player.showVideoInfo();
