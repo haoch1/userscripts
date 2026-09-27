@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.3.5
+// @version      1.3.6
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
-// @description  自动显示详细统计信息，将网速换算为 MB/s，并提供全屏时隐藏的视频快捷开关
+// @description  自动显示详细统计信息，将网速换算为 MB/s，并提供随播放控件隐显的快捷开关
 // @downloadURL  https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @updateURL    https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @match        https://www.youtube.com/*
@@ -164,9 +164,9 @@
                     height: 20px;
                     fill: currentColor;
                 }
-                #movie_player.ytp-fullscreen #${BUTTON_ID},
-                :fullscreen #${BUTTON_ID} {
-                    display: none !important;
+                #movie_player.ytp-autohide #${BUTTON_ID} {
+                    opacity: 0 !important;
+                    pointer-events: none !important;
                 }
             `;
             (document.head || document.documentElement).appendChild(style);
