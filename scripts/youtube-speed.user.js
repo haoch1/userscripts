@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.3.6
+// @version      1.3.7
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @description  自动显示详细统计信息，将网速换算为 MB/s，并提供随播放控件隐显的快捷开关
@@ -19,13 +19,14 @@
     'use strict';
 
     const BUTTON_ID = 'youtube-speed-toggle';
-    const STYLE_ID = 'youtube-speed-style';
     const SPEED_ID = 'youtube-speed-converted';
+    // Icon used by YouTube's "Stats for nerds" context-menu item.
+    const ICON_PATH = 'M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z';
     let currentVideo = null;
     let completedVideo = null;
     let button = null;
     let observedSpeedValue = null;
-    let speedObserver = null;
+    const speedObserver = new MutationObserver(updateSpeedDisplay);
 
     function videoIdFromUrl() {
         const url = new URL(location.href);
@@ -51,11 +52,11 @@
     }
 
     function updateButton(player) {
-        if (!button?.parentElement) return;
         const visible = player.isVideoInfoVisible();
+        const label = `${visible ? '关闭' : '打开'}详细统计信息`;
         button.setAttribute('aria-pressed', String(visible));
-        button.setAttribute('aria-label', visible ? '关闭详细统计信息' : '打开详细统计信息');
-        button.title = visible ? '关闭详细统计信息' : '打开详细统计信息';
+        button.setAttribute('aria-label', label);
+        button.title = label;
     }
 
     function toggleStats(event) {
@@ -76,12 +77,17 @@
         }
     }
 
+    function observeSpeedValue(value) {
+        if (value === observedSpeedValue) return;
+        speedObserver.disconnect();
+        observedSpeedValue = value;
+        if (value) speedObserver.observe(value, { characterData: true, childList: true, subtree: true });
+    }
+
     function updateSpeedDisplay() {
         const panel = document.querySelector('.html5-video-info-panel-content, .ytp-sfn-content');
         if (!panel) {
-            speedObserver?.disconnect();
-            speedObserver = null;
-            observedSpeedValue = null;
+            observeSpeedValue(null);
             return;
         }
 
@@ -89,23 +95,22 @@
             /^(?:Connection Speed|连接速度)$/i.test(child.firstElementChild?.textContent?.trim() || '')
         );
         const valueCell = row?.children[1];
-        if (!valueCell) return;
+        if (!valueCell) {
+            observeSpeedValue(null);
+            return;
+        }
 
         // Avoid a duplicate value when another converter is installed.
         if (row.querySelector('#yt-speed-converter-mbps-display')) {
             valueCell.querySelector(`#${SPEED_ID}`)?.remove();
+            observeSpeedValue(null);
             return;
         }
 
         const nativeSpeedValue = Array.from(valueCell.children).find(child =>
             child.id !== SPEED_ID && /Kbps\b/i.test(child.textContent)
         );
-        if (nativeSpeedValue !== observedSpeedValue) {
-            speedObserver?.disconnect();
-            observedSpeedValue = nativeSpeedValue || null;
-            speedObserver = observedSpeedValue ? new MutationObserver(updateSpeedDisplay) : null;
-            speedObserver?.observe(observedSpeedValue, { characterData: true, childList: true, subtree: true });
-        }
+        observeSpeedValue(nativeSpeedValue || null);
 
         const match = (nativeSpeedValue || valueCell).textContent.match(/([\d,]+(?:\.\d+)?)\s*Kbps\b/i);
         if (!match) return;
@@ -125,7 +130,6 @@
     function ensureButton(player) {
         if (!button) {
             const style = document.createElement('style');
-            style.id = STYLE_ID;
             style.textContent = `
                 #${BUTTON_ID} {
                     position: absolute;
@@ -179,8 +183,7 @@
             svg.setAttribute('aria-hidden', 'true');
             svg.setAttribute('focusable', 'false');
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            // Path from YouTube's own "Stats for nerds" context-menu icon.
-            path.setAttribute('d', 'M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z');
+            path.setAttribute('d', ICON_PATH);
             svg.appendChild(path);
             button.appendChild(svg);
             button.addEventListener('click', toggleStats);

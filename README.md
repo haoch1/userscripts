@@ -30,7 +30,7 @@
 
 | 项目 | 信息 |
 | --- | --- |
-| 当前版本 | `1.3.6` |
+| 当前版本 | `1.3.7` |
 | 脚本文件 | [`scripts/youtube-speed.user.js`](./scripts/youtube-speed.user.js) |
 | 适用网站 | `https://www.youtube.com/*`、`https://youtube.com/*` |
 | 许可证 | [MIT](./LICENSE) |
