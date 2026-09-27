@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.3.2
+// @version      1.3.3
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @description  自动显示详细统计信息，将网速换算为 MB/s，并提供视频右上角快捷开关
@@ -129,8 +129,8 @@
             style.textContent = `
                 #${BUTTON_ID} {
                     position: absolute;
-                    top: 12px;
-                    right: 12px;
+                    top: 20px;
+                    right: 20px;
                     z-index: 1000;
                     display: inline-flex;
                     align-items: center;
@@ -139,26 +139,23 @@
                     width: 30px;
                     height: 30px;
                     padding: 0;
-                    border: 1px solid rgba(255, 255, 255, .38);
+                    border: 0;
                     border-radius: 5px;
-                    background: rgba(0, 0, 0, .72);
+                    background: rgba(0, 0, 0, .62);
                     color: #fff;
                     cursor: pointer;
-                    opacity: .82;
+                    opacity: .9;
+                    outline: none;
                     pointer-events: auto;
                     transition: background-color .15s ease, opacity .15s ease;
                 }
-                #${BUTTON_ID}:hover,
-                #${BUTTON_ID}:focus-visible {
-                    background: rgba(45, 45, 45, .95);
-                    opacity: 1;
-                }
-                #${BUTTON_ID}:focus-visible {
-                    outline: 2px solid #fff;
-                    outline-offset: 2px;
-                }
                 #${BUTTON_ID}[aria-pressed="true"] {
                     background: rgba(70, 70, 70, .88);
+                    opacity: 1;
+                }
+                #${BUTTON_ID}:hover,
+                #${BUTTON_ID}:focus-visible {
+                    background: rgba(90, 90, 90, .94);
                     opacity: 1;
                 }
                 #${BUTTON_ID} svg {
