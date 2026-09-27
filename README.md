@@ -26,16 +26,18 @@
 
 ### YouTube Speed
 
-打开 YouTube 视频时自动显示播放器内置的“详细统计信息”（Stats for nerds）。支持普通视频、直播和站内切换视频。每个视频只自动打开一次，手动关闭后不会在当前视频反复弹出。
+打开 YouTube 视频时自动显示播放器内置的“详细统计信息”（Stats for nerds）。播放器右上角有一个小型“统计”按钮，可随时打开或关闭；支持普通视频、直播和站内切换视频。手动关闭后不会在当前视频反复弹出。
 
 | 项目 | 信息 |
 | --- | --- |
-| 当前版本 | `1.0.2` |
-| 脚本文件 | [`scripts/youtube-stats-for-nerds.user.js`](./scripts/youtube-stats-for-nerds.user.js) |
+| 当前版本 | `1.1.0` |
+| 脚本文件 | [`scripts/youtube-speed.user.js`](./scripts/youtube-speed.user.js) |
 | 适用网站 | `https://www.youtube.com/*`、`https://youtube.com/*` |
 | 许可证 | [MIT](./LICENSE) |
 
-**[安装 YouTube Speed](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-stats-for-nerds.user.js)**
+**[安装 YouTube Speed](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js)**
+
+旧安装地址仍可用于自动更新迁移，新安装请使用上方链接。
 
 ## 安装
 
@@ -56,7 +58,8 @@
 userscripts/
 ├── scripts/
 │   ├── speedtest-pure.user.js
-│   └── youtube-stats-for-nerds.user.js
+│   ├── youtube-speed.user.js
+│   └── youtube-stats-for-nerds.user.js  # 旧安装地址兼容
 ├── LICENSE
 └── README.md
 ```
