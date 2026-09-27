@@ -37,8 +37,6 @@
 
 **[安装 YouTube Speed](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js)**
 
-旧安装地址仍可用于自动更新迁移，新安装请使用上方链接。
-
 ## 安装
 
 1. 在浏览器中安装 [Tampermonkey](https://www.tampermonkey.net/) 并启用扩展。
@@ -58,8 +56,7 @@
 userscripts/
 ├── scripts/
 │   ├── speedtest-pure.user.js
-│   ├── youtube-speed.user.js
-│   └── youtube-stats-for-nerds.user.js  # 旧安装地址兼容
+│   └── youtube-speed.user.js
 ├── LICENSE
 └── README.md
 ```
