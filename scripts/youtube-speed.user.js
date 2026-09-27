@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.2.0
+// @version      1.3.0
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
-// @description  打开视频时显示详细统计信息，并提供播放器内快捷开关
+// @description  自动显示详细统计信息，将网速换算为 MB/s，并提供播放器快捷开关
 // @downloadURL  https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @updateURL    https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @match        https://www.youtube.com/*
@@ -20,9 +20,12 @@
 
     const BUTTON_ID = 'youtube-speed-toggle';
     const STYLE_ID = 'youtube-speed-style';
+    const SPEED_ID = 'youtube-speed-converted';
     let currentVideo = null;
     let completedVideo = null;
     let button = null;
+    let observedSpeedValue = null;
+    let speedObserver = null;
 
     function videoIdFromUrl() {
         const url = new URL(location.href);
@@ -71,6 +74,52 @@
         } catch (_) {
             // The player may be changing videos; the next sync will restore the button.
         }
+    }
+
+    function updateSpeedDisplay() {
+        const panel = document.querySelector('.html5-video-info-panel-content, .ytp-sfn-content');
+        if (!panel) {
+            speedObserver?.disconnect();
+            speedObserver = null;
+            observedSpeedValue = null;
+            return;
+        }
+
+        const row = Array.from(panel.children).find(child =>
+            /^(?:Connection Speed|连接速度)$/i.test(child.firstElementChild?.textContent?.trim() || '')
+        );
+        const valueCell = row?.children[1];
+        if (!valueCell) return;
+
+        // Avoid a duplicate value when another converter is installed.
+        if (row.querySelector('#yt-speed-converter-mbps-display')) {
+            valueCell.querySelector(`#${SPEED_ID}`)?.remove();
+            return;
+        }
+
+        const nativeSpeedValue = Array.from(valueCell.children).find(child =>
+            child.id !== SPEED_ID && /Kbps\b/i.test(child.textContent)
+        );
+        if (nativeSpeedValue !== observedSpeedValue) {
+            speedObserver?.disconnect();
+            observedSpeedValue = nativeSpeedValue || null;
+            speedObserver = observedSpeedValue ? new MutationObserver(updateSpeedDisplay) : null;
+            speedObserver?.observe(observedSpeedValue, { characterData: true, childList: true, subtree: true });
+        }
+
+        const match = (nativeSpeedValue || valueCell).textContent.match(/([\d,]+(?:\.\d+)?)\s*Kbps\b/i);
+        if (!match) return;
+        const kbps = Number(match[1].replaceAll(',', ''));
+        if (!Number.isFinite(kbps)) return;
+
+        let converted = valueCell.querySelector(`#${SPEED_ID}`);
+        if (!converted) {
+            converted = document.createElement('span');
+            converted.id = SPEED_ID;
+            converted.style.cssText = 'margin-left:6px;color:#63c9ff;font-weight:600;white-space:nowrap;';
+            valueCell.appendChild(converted);
+        }
+        converted.textContent = `(${(kbps / 8192).toFixed(2)} MB/s)`;
     }
 
     function ensureButton(controls) {
@@ -130,7 +179,14 @@
             button.id = BUTTON_ID;
             button.className = 'ytp-button';
             button.type = 'button';
-            button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 19.5h16M6 17v-4m4 4V9m4 8v-5m4 5V6"/></svg>';
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('aria-hidden', 'true');
+            svg.setAttribute('focusable', 'false');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M4 19.5h16M6 17v-4m4 4V9m4 8v-5m4 5V6');
+            svg.appendChild(path);
+            button.appendChild(svg);
             button.addEventListener('click', toggleStats);
             for (const type of ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'dblclick', 'keydown']) {
                 button.addEventListener(type, event => event.stopPropagation());
@@ -140,6 +196,7 @@
     }
 
     function sync() {
+        updateSpeedDisplay();
         const videoId = videoIdFromUrl();
         if (videoId !== currentVideo) {
             currentVideo = videoId;
