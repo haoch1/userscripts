@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="详细统计信息">
+  <rect width="48" height="48" rx="4" fill="#535151"/>
+  <circle cx="24" cy="24" r="11" fill="none" stroke="#fff" stroke-width="2.5"/>
+  <circle cx="24" cy="18.5" r="1.45" fill="#fff"/>
+  <path d="M24 23.5v7" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

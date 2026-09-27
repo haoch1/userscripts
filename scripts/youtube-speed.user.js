@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.3.0
+// @version      1.3.1
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @description  自动显示详细统计信息，将网速换算为 MB/s，并提供播放器快捷开关
@@ -133,12 +133,14 @@
                     align-items: center;
                     justify-content: center;
                     box-sizing: border-box;
-                    width: 38px;
-                    height: 100%;
+                    width: 40px;
+                    height: 36px;
+                    flex: 0 0 40px;
+                    align-self: center;
                     padding: 0;
                     border: 0;
-                    border-radius: 8px;
-                    background: transparent;
+                    border-radius: 4px;
+                    background: #535151;
                     color: #fff;
                     cursor: pointer;
                     pointer-events: auto;
@@ -146,31 +148,21 @@
                 }
                 #${BUTTON_ID}.ytp-button:hover,
                 #${BUTTON_ID}.ytp-button:focus-visible {
-                    background: rgba(255, 255, 255, .14);
+                    background: #696767;
                 }
                 #${BUTTON_ID}.ytp-button:focus-visible {
                     outline: 2px solid #fff;
                     outline-offset: -3px;
                 }
+                #${BUTTON_ID}[aria-pressed="false"] {
+                    background: #3d3c3c;
+                }
                 #${BUTTON_ID} svg {
                     display: block;
-                    width: 20px;
-                    height: 20px;
+                    width: 36px;
+                    height: 36px;
                     fill: none;
                     stroke: currentColor;
-                    stroke-width: 2;
-                    stroke-linecap: round;
-                }
-                #${BUTTON_ID}[aria-pressed="true"]::after {
-                    content: '';
-                    position: absolute;
-                    top: 8px;
-                    right: 4px;
-                    width: 5px;
-                    height: 5px;
-                    border-radius: 50%;
-                    background: #ff4e45;
-                    box-shadow: 0 0 0 2px rgba(0, 0, 0, .5);
                 }
             `;
             (document.head || document.documentElement).appendChild(style);
@@ -180,11 +172,26 @@
             button.className = 'ytp-button';
             button.type = 'button';
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('viewBox', '0 0 48 48');
             svg.setAttribute('aria-hidden', 'true');
             svg.setAttribute('focusable', 'false');
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', '24');
+            circle.setAttribute('cy', '24');
+            circle.setAttribute('r', '11');
+            circle.setAttribute('stroke-width', '2.5');
+            const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            dot.setAttribute('cx', '24');
+            dot.setAttribute('cy', '18.5');
+            dot.setAttribute('r', '1.45');
+            dot.setAttribute('fill', 'currentColor');
+            dot.setAttribute('stroke', 'none');
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', 'M4 19.5h16M6 17v-4m4 4V9m4 8v-5m4 5V6');
+            path.setAttribute('d', 'M24 23.5v7');
+            path.setAttribute('stroke-width', '2.5');
+            path.setAttribute('stroke-linecap', 'round');
+            svg.appendChild(circle);
+            svg.appendChild(dot);
             svg.appendChild(path);
             button.appendChild(svg);
             button.addEventListener('click', toggleStats);
