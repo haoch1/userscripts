@@ -24,6 +24,19 @@
 
 **[安装 Speedtest Pure](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/speedtest-pure.user.js)**
 
+### YouTube Stats for Nerds Auto
+
+打开 YouTube 视频时自动显示播放器内置的“详细统计信息”（Stats for nerds）。支持普通视频、直播和站内切换视频。每个视频只自动打开一次，手动关闭后不会在当前视频反复弹出。
+
+| 项目 | 信息 |
+| --- | --- |
+| 当前版本 | `1.0.0` |
+| 脚本文件 | [`scripts/youtube-stats-for-nerds.user.js`](./scripts/youtube-stats-for-nerds.user.js) |
+| 适用网站 | `https://www.youtube.com/*`、`https://youtube.com/*` |
+| 许可证 | [MIT](./LICENSE) |
+
+**[安装 YouTube Stats for Nerds Auto](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-stats-for-nerds.user.js)**
+
 ## 安装
 
 1. 在浏览器中安装 [Tampermonkey](https://www.tampermonkey.net/) 并启用扩展。
@@ -43,7 +56,7 @@
 userscripts/
 ├── scripts/
 │   ├── speedtest-pure.user.js
-│   └── <other-script>.user.js
+│   └── youtube-stats-for-nerds.user.js
 ├── LICENSE
 └── README.md
 ```
