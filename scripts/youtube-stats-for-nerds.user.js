@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         YouTube Stats for Nerds Auto
+// @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.0.1
+// @version      1.0.2
 // @icon         https://www.youtube.com/favicon.ico
 // @description  打开 YouTube 视频时自动显示播放器的“详细统计信息”
 // @downloadURL  https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-stats-for-nerds.user.js
