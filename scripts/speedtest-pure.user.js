@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    https://www.speedtest.net/
-// @version      1.0.0
+// @version      1.0.1
 // @icon         https://www.speedtest.net/favicon.ico
 // @description  精简测速界面，默认单连接；IP 点击显示/隐藏，支持 IPv4/IPv6
 // @downloadURL  https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/speedtest-pure.user.js
@@ -31,7 +31,8 @@
     const POPUP = '[role="menu"], [role="listbox"], [role="dialog"], dialog, [aria-modal="true"], [data-popper-placement], [data-radix-popper-content-wrapper], [data-testid*="menu" i], [data-testid*="dropdown" i], [aria-label*="menu" i]:not(button), [class*="dropdown" i], [class*="popover" i]';
     const LINKS = 'a[href*="/about/" i], a[href*="/apps/" i], a[href="/global-index"], a[href="/performance"], a[href*="downdetector" i], a[href*="ookla.com" i]';
     const TRACKING = /^(?:_gl|_ga|_up|gclid|dclid|fbclid|msclkid|utm_[^=]+)$/i;
-    const ADS = '.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, .lowerboard-placeholder, [data-ad-slot="true"], [data-pogo="top"], [data-pogo="main"], [data-pogo="footer"], #stnext_leaderboard, #results_stnext_leaderboard, #stnext_lowerboard, #stnext_footer, [class*="downdetector" i], [id*="downdetector" i], [class*="advert" i], [class*="promo" i], [role="contentinfo"], iframe, video, footer';
+    const AD_SLOTS = '.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, .lowerboard-placeholder, [data-ad-slot="true"], [data-pogo="top"], [data-pogo="main"], [data-pogo="footer"], #stnext_leaderboard, #results_stnext_leaderboard, #stnext_lowerboard, #stnext_footer';
+    const ADS = `${AD_SLOTS}, [class*="downdetector" i], [id*="downdetector" i], [class*="advert" i], [class*="promo" i], [role="contentinfo"], iframe, video, footer`;
     const SKIP = 'script, style, noscript, textarea, input, select, pre, code, [contenteditable]:not([contenteditable="false"])';
     const norm = value => (value || '').replace(/\s+/g, ' ').trim();
     const text = element => norm(element?.textContent);
@@ -42,7 +43,7 @@
     style.id = ID;
     style.textContent = `
         html, body { margin: 0 !important; }
-        :where(.pure-u-custom-speedtest, #speedtest, .speedtest-app, [data-testid*="speedtest" i]):not([${ROOT}]) {
+        :where(${PANEL}):not([${ROOT}]), [${ROOT}] {
             --stp-width: 764px;
             display: block !important; width: min(100%, var(--stp-width)) !important;
             max-width: var(--stp-width) !important; min-width: 0 !important;
@@ -50,20 +51,12 @@
             box-sizing: border-box !important; position: relative !important;
             left: auto !important; right: auto !important; transform: none !important;
         }
-        :where(.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, .lowerboard-placeholder, [data-ad-slot="true"], [data-pogo="top"], [data-pogo="main"], [data-pogo="footer"], #stnext_leaderboard, #results_stnext_leaderboard, #stnext_lowerboard, #stnext_footer, #target-section, footer, [data-view-instance-placeholder="lowerContent"]) {
+        :where(${AD_SLOTS}, #target-section, footer, [data-view-instance-placeholder="lowerContent"]) {
             display: none !important;
         }
         body[${MODE}] {
             padding-top: var(--stp-header-height, 0px) !important;
             scrollbar-gutter: stable !important; overflow-anchor: none !important;
-        }
-        [${ROOT}] {
-            --stp-width: 764px;
-            display: block !important; width: min(100%, var(--stp-width)) !important;
-            max-width: var(--stp-width) !important; min-width: 0 !important;
-            margin: 24px auto 40px !important; float: none !important;
-            box-sizing: border-box !important; position: relative !important;
-            left: auto !important; right: auto !important; transform: none !important;
         }
         [${ROOT}="result"] { --stp-width: 1300px; }
         [${ROOT}] .pure-u-custom-speedtest {
@@ -181,13 +174,16 @@
             return;
         }
         for (const dialog of dialogs) mark(dialog, SERVER_DIALOG);
-        if (!serverDialogOpen) serverDialogOpen = true;
+        serverDialogOpen = true;
         if (serverDialogScrollY === null) serverDialogScrollY = window.scrollY;
-        if (Math.abs(window.scrollY - serverDialogScrollY) > 1) {
-            restoringScroll = true;
-            window.scrollTo(0, serverDialogScrollY);
-            restoringScroll = false;
-        }
+        restoreDialogScroll();
+    }
+
+    function restoreDialogScroll() {
+        if (restoringScroll || !serverDialogOpen || serverDialogScrollY === null || Math.abs(window.scrollY - serverDialogScrollY) <= 1) return;
+        restoringScroll = true;
+        window.scrollTo(0, serverDialogScrollY);
+        restoringScroll = false;
     }
 
     function isolate() {
@@ -286,6 +282,13 @@
         while (walker.nextNode()) remember(walker.currentNode);
     }
 
+    function scanResultPage() {
+        if (!resultPage() || !document.body || ipPageScanned) return false;
+        scan(document.body);
+        ipPageScanned = ipNodes.size > 0;
+        return true;
+    }
+
     function renderIPs(hide = !revealed) {
         for (const [node, saved] of ipNodes) {
             const inScope = root?.contains(node) || (resultPage() && document.body?.contains(node));
@@ -346,33 +349,31 @@
     }
 
     const observer = new MutationObserver(collect);
+    function resetPage() {
+        renderIPs(true);
+        clearLayout();
+        root = null; phase = 'idle'; revealed = false;
+        for (const { host } of ipNodes.values()) {
+            host.removeAttribute(IP_MARK);
+            host.removeAttribute(IP_TIP);
+        }
+        ipNodes.clear(); pending.clear(); ipPageScanned = false;
+        route = location.pathname;
+        singleDone = false; singleTries = 0; singleAt = -Infinity;
+        serverDialogOpen = false; serverDialogScrollY = null;
+        layoutDirty = contentDirty = true;
+    }
+
     function flush() {
         timer = null;
         lastRun = performance.now();
         cleanLinks();
-        if (route !== location.pathname || (root && !root.isConnected)) {
-            renderIPs(true);
-            clearLayout();
-            root = null; phase = 'idle'; revealed = false;
-            for (const record of ipNodes.values()) {
-                record.host.removeAttribute(IP_MARK);
-                record.host.removeAttribute(IP_TIP);
-            }
-            ipNodes.clear(); pending.clear(); ipPageScanned = false;
-            route = location.pathname;
-            singleDone = false; singleTries = 0; singleAt = -Infinity;
-            serverDialogOpen = false; serverDialogScrollY = null;
-            layoutDirty = contentDirty = true;
-        }
+        if (route !== location.pathname || (root && !root.isConnected)) resetPage();
         const next = findRoot();
         if (!(next instanceof HTMLElement) || next === document.body || next === document.documentElement) {
             serverDialogOpen = false;
             serverDialogScrollY = null;
-            if (resultPage() && document.body && !ipPageScanned) {
-                scan(document.body);
-                ipPageScanned = ipNodes.size > 0;
-                renderIPs();
-            }
+            if (scanResultPage()) renderIPs();
             return;
         }
         if (next !== root) {
@@ -394,10 +395,7 @@
         }
         for (const scope of pending) if (scope.isConnected && root.contains(scope)) scan(scope);
         pending.clear();
-        if (resultPage() && !ipPageScanned && document.body) {
-            scan(document.body);
-            ipPageScanned = ipNodes.size > 0;
-        }
+        scanResultPage();
         renderIPs();
         collect(observer.takeRecords());
         selectSingle();
@@ -439,13 +437,7 @@
             schedule();
         }, { passive: true });
     }
-    window.addEventListener('scroll', () => {
-        if (!restoringScroll && serverDialogOpen && serverDialogScrollY !== null && Math.abs(window.scrollY - serverDialogScrollY) > 1) {
-            restoringScroll = true;
-            window.scrollTo(0, serverDialogScrollY);
-            restoringScroll = false;
-        }
-    }, { passive: true });
+    window.addEventListener('scroll', restoreDialogScroll, { passive: true });
     window.navigation?.addEventListener('navigatesuccess', schedule);
     flush();
 })();

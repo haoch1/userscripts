@@ -17,7 +17,7 @@
 
 | 项目 | 信息 |
 | --- | --- |
-| 当前版本 | `1.0.0` |
+| 当前版本 | `1.0.1` |
 | 脚本文件 | [`scripts/speedtest-pure.user.js`](./scripts/speedtest-pure.user.js) |
 | 适用网站 | `https://www.speedtest.net/*`、`https://speedtest.net/*` |
 | 许可证 | [MIT](./LICENSE) |
