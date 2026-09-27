@@ -30,7 +30,7 @@
 
 | 项目 | 信息 |
 | --- | --- |
-| 当前版本 | `1.0.0` |
+| 当前版本 | `1.0.1` |
 | 脚本文件 | [`scripts/youtube-stats-for-nerds.user.js`](./scripts/youtube-stats-for-nerds.user.js) |
 | 适用网站 | `https://www.youtube.com/*`、`https://youtube.com/*` |
 | 许可证 | [MIT](./LICENSE) |

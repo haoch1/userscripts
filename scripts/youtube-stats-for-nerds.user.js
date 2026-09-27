@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Stats for Nerds Auto
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.0.0
+// @version      1.0.1
 // @icon         https://www.youtube.com/favicon.ico
 // @description  打开 YouTube 视频时自动显示播放器的“详细统计信息”
 // @downloadURL  https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-stats-for-nerds.user.js
@@ -46,8 +46,9 @@
         try {
             if (typeof player?.showVideoInfo === 'function' &&
                 typeof player.isVideoInfoVisible === 'function') {
-                const loadedId = player.getVideoData?.()?.video_id;
-                if (!loadedId || loadedId === videoId) {
+                const videoReady = typeof player.getVideoData !== 'function' ||
+                    player.getVideoData()?.video_id === videoId;
+                if (videoReady) {
                     if (!player.isVideoInfoVisible()) player.showVideoInfo();
                     if (player.isVideoInfoVisible()) {
                         completedVideo = videoId;
