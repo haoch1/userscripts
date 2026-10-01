@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.3.10
+// @version      2.0.0
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @description  通过快捷按钮切换详细统计信息，将网速换算为 MB/s，按钮随播放控件隐显
