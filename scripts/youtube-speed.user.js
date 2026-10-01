@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.3.8
+// @version      1.3.9
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
-// @description  通过快捷按钮切换详细统计信息，将网速换算为 MB/s，按钮随播放控件隐显
+// @description  每个视频默认关闭详细统计信息，通过快捷按钮开启；网速换算为 MB/s，按钮随播放控件隐显
 // @downloadURL  https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @updateURL    https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @match        https://www.youtube.com/*
@@ -23,6 +23,7 @@
     // Icon used by YouTube's "Stats for nerds" context-menu item.
     const ICON_PATH = 'M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z';
     let button = null;
+    let openedVideoId = null;
     let observedSpeedValue = null;
     const speedObserver = new MutationObserver(updateSpeedDisplay);
 
@@ -41,7 +42,7 @@
             typeof player.isVideoInfoVisible !== 'function') return null;
 
         try {
-            if (typeof player.getVideoData === 'function' &&
+            if (videoId && typeof player.getVideoData === 'function' &&
                 player.getVideoData()?.video_id !== videoId) return null;
         } catch (_) {
             return null;
@@ -66,8 +67,10 @@
         if (!player) return;
 
         try {
-            if (player.isVideoInfoVisible()) player.hideVideoInfo();
+            const visible = player.isVideoInfoVisible();
+            if (visible) player.hideVideoInfo();
             else player.showVideoInfo();
+            openedVideoId = visible ? null : videoId;
             updateButton(player);
         } catch (_) {
             // The player may be changing videos; the next sync will restore the button.
@@ -194,14 +197,22 @@
     function sync() {
         updateSpeedDisplay();
         const videoId = videoIdFromUrl();
-        const player = videoId && getReadyPlayer(videoId);
+        if (openedVideoId !== videoId) openedVideoId = null;
+        const player = getReadyPlayer();
         if (!player) {
             button?.remove();
             return;
         }
 
-        ensureButton(player);
         try {
+            // Close inherited stats even while the next video is still loading.
+            if (!openedVideoId && player.isVideoInfoVisible()) player.hideVideoInfo();
+            if (!player.isVideoInfoVisible()) openedVideoId = null;
+            if (!videoId || !getReadyPlayer(videoId)) {
+                button?.remove();
+                return;
+            }
+            ensureButton(player);
             updateButton(player);
         } catch (_) {
             // Retry when YouTube finishes initializing or replacing the player.
