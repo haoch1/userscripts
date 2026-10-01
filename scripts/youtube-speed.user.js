@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      1.3.7
+// @version      1.3.8
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
-// @description  自动显示详细统计信息，将网速换算为 MB/s，并提供随播放控件隐显的快捷开关
+// @description  通过快捷按钮切换详细统计信息，将网速换算为 MB/s，按钮随播放控件隐显
 // @downloadURL  https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @updateURL    https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js
 // @match        https://www.youtube.com/*
@@ -22,8 +22,6 @@
     const SPEED_ID = 'youtube-speed-converted';
     // Icon used by YouTube's "Stats for nerds" context-menu item.
     const ICON_PATH = 'M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z';
-    let currentVideo = null;
-    let completedVideo = null;
     let button = null;
     let observedSpeedValue = null;
     const speedObserver = new MutationObserver(updateSpeedDisplay);
@@ -70,7 +68,6 @@
         try {
             if (player.isVideoInfoVisible()) player.hideVideoInfo();
             else player.showVideoInfo();
-            completedVideo = videoId;
             updateButton(player);
         } catch (_) {
             // The player may be changing videos; the next sync will restore the button.
@@ -197,11 +194,6 @@
     function sync() {
         updateSpeedDisplay();
         const videoId = videoIdFromUrl();
-        if (videoId !== currentVideo) {
-            currentVideo = videoId;
-            completedVideo = null;
-        }
-
         const player = videoId && getReadyPlayer(videoId);
         if (!player) {
             button?.remove();
@@ -210,10 +202,6 @@
 
         ensureButton(player);
         try {
-            if (completedVideo !== videoId) {
-                if (!player.isVideoInfoVisible()) player.showVideoInfo();
-                if (player.isVideoInfoVisible()) completedVideo = videoId;
-            }
             updateButton(player);
         } catch (_) {
             // Retry when YouTube finishes initializing or replacing the player.
