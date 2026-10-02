@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Speed
 // @namespace    https://github.com/haoch1/userscripts
-// @version      2.0.0
+// @version      2.0.1
 // @icon         https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @icon64       https://www.youtube.com/s/desktop/af0a3c1e/img/favicon_144x144.png
 // @description  通过快捷按钮切换详细统计信息，将网速换算为 MB/s，按钮随播放控件隐显
@@ -26,6 +26,9 @@
     let openedPlayer = null;
     let observedSpeedValue = null;
     const speedObserver = new MutationObserver(updateSpeedDisplay);
+    const panelObserver = new MutationObserver(() => {
+        if (updateSpeedDisplay()) panelObserver.disconnect();
+    });
 
     function videoIdFromUrl() {
         const url = new URL(location.href);
@@ -52,6 +55,7 @@
 
     function updateButton(player) {
         const visible = player.isVideoInfoVisible();
+        if (!visible) panelObserver.disconnect();
         if (!visible && openedPlayer === player) openedPlayer = null;
         const label = `${visible ? '关闭' : '打开'}详细统计信息`;
         button.setAttribute('aria-pressed', String(visible));
@@ -67,18 +71,26 @@
         const player = videoId && getReadyPlayer(videoId);
         if (!player) return;
 
+        panelObserver.disconnect();
         try {
             const visible = player.isVideoInfoVisible();
             if (visible) player.hideVideoInfo();
-            else player.showVideoInfo();
+            else {
+                // Catch the first speed value even if YouTube renders the panel asynchronously.
+                panelObserver.observe(player, { childList: true, characterData: true, subtree: true });
+                player.showVideoInfo();
+            }
             openedPlayer = visible ? null : player;
+            if (updateSpeedDisplay()) panelObserver.disconnect();
             updateButton(player);
         } catch (_) {
+            panelObserver.disconnect();
             // The player may be changing videos; the next sync will restore the button.
         }
     }
 
     function closeOpenedStats() {
+        panelObserver.disconnect();
         if (!openedPlayer) return;
         try {
             if (openedPlayer.isVideoInfoVisible()) openedPlayer.hideVideoInfo();
@@ -115,7 +127,7 @@
         if (row.querySelector('#yt-speed-converter-mbps-display')) {
             valueCell.querySelector(`#${SPEED_ID}`)?.remove();
             observeSpeedValue(null);
-            return;
+            return true;
         }
 
         const nativeSpeedValue = Array.from(valueCell.children).find(child =>
@@ -135,7 +147,9 @@
             converted.style.cssText = 'margin-left:6px;color:#63c9ff;font-weight:600;white-space:nowrap;';
             valueCell.appendChild(converted);
         }
-        converted.textContent = `(${(kbps / 8192).toFixed(2)} MB/s)`;
+        const display = `(${(kbps / 8192).toFixed(2)} MB/s)`;
+        if (converted.textContent !== display) converted.textContent = display;
+        return true;
     }
 
     function ensureButton(player) {

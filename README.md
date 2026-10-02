@@ -7,7 +7,7 @@
 | 脚本 | 核心用途 | 当前版本 | 操作 |
 | :--- | :--- | :--- | :--- |
 | [**Speedtest Pure**](#speedtest-pure) | 精简测速页面 · 单连接模式 · 页面 IP 遮挡 | `1.0.1` | [安装](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/speedtest-pure.user.js) · [源码](./scripts/speedtest-pure.user.js) |
-| [**YouTube Speed**](#youtube-speed) | 手动切换播放统计 · MB/s 网速换算 | `2.0.0` | [安装](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js) · [源码](./scripts/youtube-speed.user.js) |
+| [**YouTube Speed**](#youtube-speed) | 手动切换播放统计 · MB/s 网速换算 | `2.0.1` | [安装](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js) · [源码](./scripts/youtube-speed.user.js) |
 
 ## Speedtest Pure
 
@@ -25,7 +25,7 @@
 通过视频右上角的快捷按钮，手动打开或关闭播放器内置的“详细统计信息”（Stats for nerds），并把连接速度换算成更直观的 MB/s。
 
 - **适用范围**：支持普通视频、直播及站内切换视频。
-- **网速换算**：将统计面板中的 Kbps 数值转换为 MB/s，保留两位小数。
+- **网速换算**：统计面板的网速数据出现时，即时将 Kbps 转换为 MB/s，保留两位小数。
 - **快捷开关**：点击按钮打开或关闭统计面板；离开当前视频时，关闭由快捷按钮打开的面板。
 - **跟随控件**：进度条和播放控件自动隐藏时，按钮同步隐藏；控件出现时恢复。
 
