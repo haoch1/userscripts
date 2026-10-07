@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    https://www.speedtest.net/
-// @version      1.0.1
+// @version      1.0.2
 // @icon         https://www.speedtest.net/favicon.ico
 // @description  精简测速界面，默认单连接；IP 点击显示/隐藏，支持 IPv4/IPv6
 // @downloadURL  https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/speedtest-pure.user.js
@@ -14,8 +14,18 @@
 // @license      MIT
 // ==/UserScript==
 
-(() => {
+(function init() {
     'use strict';
+    if (!document.documentElement) {
+        const bootstrap = new MutationObserver(() => {
+            if (!document.documentElement) return;
+            bootstrap.disconnect();
+            init();
+        });
+        bootstrap.observe(document, { childList: true });
+        return;
+    }
+
     const ID = 'speedtest-pure-mode-style';
     if (document.getElementById(ID)) return;
 

@@ -6,7 +6,7 @@
 
 | 脚本 | 核心功能 | 当前版本 | 资源 |
 | :--- | :--- | :--- | :--- |
-| [**Speedtest Pure**](#speedtest-pure) | 精简测速页面 · 单连接模式 · 页面 IP 遮挡 | `1.0.1` | [安装](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/speedtest-pure.user.js) · [源码](./scripts/speedtest-pure.user.js) |
+| [**Speedtest Pure**](#speedtest-pure) | 精简测速页面 · 单连接模式 · 页面 IP 遮挡 | `1.0.2` | [安装](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/speedtest-pure.user.js) · [源码](./scripts/speedtest-pure.user.js) |
 | [**YouTube Speed**](#youtube-speed) | 手动切换播放统计 · MB/s 网速换算 | `2.0.1` | [安装](https://raw.githubusercontent.com/haoch1/userscripts/main/scripts/youtube-speed.user.js) · [源码](./scripts/youtube-speed.user.js) |
 
 ## Speedtest Pure
